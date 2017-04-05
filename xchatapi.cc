@@ -66,8 +66,8 @@ namespace net {
 			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post.c_str());
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
 			curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
-			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1L);
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, xchatapi_curl_writer);
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
 			res = curl_easy_perform(curl);
