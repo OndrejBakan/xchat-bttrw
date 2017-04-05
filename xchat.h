@@ -12,6 +12,7 @@
 #include "TomiTCP/http.h"
 #include "TomiTCP/str.h"
 #include "TomiTCP/cookies.h"
+#include "xchatapi.h"
 #include "charset.h"
 
 /** \brief A namespace containing classes, functions, types and variables for
@@ -271,9 +272,9 @@ namespace xchat {
 	    int makesrv(server_type type);
 	    string lastsrv_broke();
             string makepath(const string& path, path_type type);
-            int request_GET(net::TomiHTTP &s, server_type st, const string& path,
+            int request_GET(net::XChatAPI &s, server_type st, const string& path,
                     path_type pt);
-            int request_POST(net::TomiHTTP &s, server_type st, const string& path,
+            int request_POST(net::XChatAPI &s, server_type st, const string& path,
                     path_type pt, const string &data);
 	    net::TomiCookies cookies; ///< Cookies for connection.
 
@@ -308,6 +309,7 @@ namespace xchat {
 	    auto_ptr<Event> recvq_pop();
 	    string recode_to_client(string s);
 	    string recode_from_client(string s);
+      string gettoken(const string& rid);      
 
 	    XChat(const string& user, const string& pass);
 	    ~XChat();
@@ -318,7 +320,7 @@ namespace xchat {
 	    void leave(string rid);
 	    void getroominfo(room& r);
 	    void getmsg(room& r, bool first = false);
-	    bool putmsg(room& r, const string& target, const string& msg);
+	    bool putmsg(room& r, const string& target, const string& msg, const string& token);
 	    void setdesc(const string& rid, const string& desc);
 
 	    void stripjsescapes(string &s);

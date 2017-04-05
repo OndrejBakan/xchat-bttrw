@@ -91,7 +91,7 @@ namespace xchat {
 	    string link = "";
 
 	    {
-		static string pat = "<img src=\"http://x.ximg",
+		static string pat = "<img src=\"https://x.ximg",
 		    pat2 = ".gif\"", pat3 = "/sm/";
 		string::size_type c, d;
 		if (!s.compare(a, pat.length(), pat) &&
@@ -104,7 +104,7 @@ namespace xchat {
 	    }
 
 	    {
-		static string pat = "<a href=\"http://redir.xchat.cz/~guest~/?url=",
+		static string pat = "<a href=\"https://redir.xchat.cz/~guest~/?url=",
 		    pat2 = "</a>", pat3 = "\" target";
 		string::size_type c, d;
 		if (!s.compare(a, pat.length(), pat) &&
@@ -437,16 +437,16 @@ namespace xchat {
 	static string pat = "<A TARGET=_blank HREF=\\\"/advert/advert.php";
 	string::size_type pos, pos2;
 	if ((pos = m.find(pat)) != string::npos) {
-	    link = "http://www.xchat.cz/advert/advert.php" +
+	    link = "https://www.xchat.cz/advert/advert.php" +
 		string(m, pos + pat.length());
 	    link.erase(link.find("\\\""));
 	    return 1;
 	}
 
-	static string pat2 = "<a href=\\\"http://", pat3 = " target=\\\"_new\\\">";
+	static string pat2 = "<a href=\\\"https://", pat3 = " target=\\\"_new\\\">";
 	if ((pos = m.find(pat2)) != string::npos &&
 		(pos2 = m.find("\\\"", pos + pat2.length())) != string::npos) {
-	    link = "http://" +
+	    link = "https://" +
 		string(m, pos + pat2.length(), pos2 - pos - pat2.length());
 	    if (pos2 + 2 < m.length() && !m.compare(pos2 + 2, pat3.length(), pat3))
 		return 1;

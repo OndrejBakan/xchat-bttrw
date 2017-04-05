@@ -25,7 +25,7 @@ namespace xchat {
      */
     void XChat::list(listout_t &listout, int type)
     {
-	TomiHTTP s;
+	XChatAPI s;
 	string l;
 
 	int retries = servers.size();

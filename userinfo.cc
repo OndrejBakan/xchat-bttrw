@@ -14,7 +14,7 @@ namespace xchat {
      */
     userinfo_t XChat::userinfo(const string& nick)
     {
-	TomiHTTP s;
+	XChatAPI s;
 
 	int retries = servers.size();
 retry1:

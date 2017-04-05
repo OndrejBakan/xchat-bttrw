@@ -12,7 +12,7 @@ namespace xchat {
      */
     void XChat::loadsuperadmins()
     {
-	TomiHTTP s;
+	XChatAPI s;
 	string l;
 	int count, pos;
 
@@ -39,7 +39,6 @@ retry:
 	    if (!s.getline(l))
 		throw runtime_error("Superadmins list is not complete.");
 	    wstrip(l);
-
     	    superadmin_t superadmin;
 
 	    superadmin.nick = string(l, 0, l.find(' '));

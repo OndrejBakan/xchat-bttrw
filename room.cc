@@ -59,9 +59,13 @@ namespace xchat {
      */
     void XChat::join(const string& rid)
     {
-	TomiHTTP s;
+	XChatAPI s;
 	string l;
 	room r;
+
+  if(rid != "")
+  {
+  
 
 	r.l = -1;
 	r.rid = rid;
@@ -76,9 +80,8 @@ namespace xchat {
 	retries = servers.size();
 retry0:
 	try {
-	    ret = request_GET(s, SERVER_MODCHAT,
-		    "room/intro.php?_btn_enter=ENTER&disclaim=1&sexwarn=1&rid=" + rid,
-		    PATH_AUTH);
+	    ret = request_POST(s, SERVER_MODCHAT,
+		    "room/intro.php", PATH_AUTH, "_btn_enter=ENTER&disclaim=1&sexwarn=1&rid=" + rid);
 	} catch (runtime_error &e) {
 	    if (retries--) {
 		lastsrv_broke();
@@ -120,7 +123,7 @@ retry0:
 	}
 	s.close();
 	
-	if (!captcha && !password && ret != 302)
+	if (!captcha && !password && ret != 302 && rid != "")
 	    throw runtime_error("Not HTTP 302 Found while accepting channel rules");
 	
 	/*
@@ -139,7 +142,7 @@ retry1:
 		goto retry1;
 	    } else
 		throw runtime_error(string(e.what()) + " - " + lastsrv_broke());
-	}
+	}              
 	while (s.getline(l)) {
 	    static string pat1 = "<h3 class=\"hdrsuccess\">", pat2 = "</h3>";
 	    string::size_type a, b;
@@ -177,7 +180,7 @@ retry2:
 		    "modchat?op=textpageng&skin=2&js=1&rid=" + rid, PATH_AUTH);
 	    if (ret != 200)
 		throw runtime_error("Not HTTP 200 Ok while joining channel");
-	} catch (runtime_error &e) {
+  } catch (runtime_error &e) {
 	    if (retries--) {
 		lastsrv_broke();
 		goto retry2;
@@ -239,6 +242,8 @@ retry2:
 	// insert it
 	rooms[rid] = r;
     }
+    
+   } 
 
     /**
      * Leave room.
@@ -248,7 +253,7 @@ retry2:
     {
 	rooms.erase(rid);
 	
-	TomiHTTP s;
+	XChatAPI s;
 
 	int retries = servers.size();
 retry:
@@ -289,8 +294,11 @@ retry:
      */
     void XChat::getroominfo(room& r)
     {
-	TomiHTTP s;
+	XChatAPI s;
 	string l;
+  
+  if(r.rid != "")
+  {
 
 	int ret, retries;
 
@@ -368,6 +376,9 @@ retry:
 	    } else
 		throw runtime_error("No roominfo - " + lastsrv_broke());
 	}
+  
+  }
+  
     }
 
     /**
@@ -378,7 +389,11 @@ retry:
      */
     void XChat::getmsg(room& r, bool first)
     {
-	TomiHTTP s;
+	XChatAPI s;
+  
+  if(r.rid != "")
+  {
+    
 	int ret;
 	int retries = servers.size();
 retry:
@@ -472,6 +487,7 @@ retry:
 		    }
 		}
 	    }
+   
 
 	    /*
 	     * Check for current admin and locked status
@@ -533,7 +549,7 @@ retry:
 		}
 
 		if (!kicker.length() && !kickmsg.length()) {
-		    TomiHTTP c; string m;
+		    XChatAPI c; string m;
 		    try {
 			ret = request_GET(c, SERVER_MODCHAT, url, PATH_AUTH);
 			if (ret != 200)
@@ -609,19 +625,25 @@ retry:
 	    } else
 		throw runtime_error(recode_to_client(kickmsg));
 	} else if (r.l == -1) {
-	    for (vector<string>::iterator i = dbg.begin(); i != dbg.end(); i++)
-		cout << *i << endl;
-	    if (!first) {
-		auto_ptr<EvRoomError> e(new EvRoomError);
-		e->s = "Parse error";
-		e->rid = r.rid;
-		e->fatal = true;
-		recvq_push((auto_ptr<Event>) e);
-		rooms.erase(r.rid);
+	    /* 
+       * after migration server with this condition got parse error
+       * removed RoomErrorMsg and replaced with join for re-join
+       */
+      if (!first) { 
+        if(r.rid != "")
+        {       
+		     join(r.rid);
+		     auto_ptr<EvRoomSysMsg> e(new EvRoomSysMsg);
+		     e->s = recode_to_client("Parse error - znovu jsem se pøipojil");
+		     e->rid = r.rid;
+		     recvq_push((auto_ptr<Event>) e); 
+        }       
 	    } else
-		throw runtime_error("Parse error");
+		throw runtime_error(lastsrv_broke());
 	}
     }
+    
+   } 
 
     /**
      * Send a message.
@@ -631,14 +653,15 @@ retry:
      * \return True if the message was posted, false if xchat rejected it. In
      * case of network/HTTP/cluster error, exception is thrown.
      */
-    bool XChat::putmsg(room &r, const string& target, const string& msg)
+    bool XChat::putmsg(room &r, const string& target, const string& msg, const string& token)
     {
-	TomiHTTP s;
+	XChatAPI s;
 	try {
 	    int ret = request_POST(s, SERVER_MODCHAT,
 		    "modchat", PATH_AUTH,
 		    "op=textpageng&js=1&skin=2&rid=" + r.rid +
 		    "&textarea=" + TomiHTTP::URLencode(msg) +
+		    "&wtkn=" + TomiHTTP::URLencode(token) +        
 		    "&target=" + TomiHTTP::URLencode(target));
 	    if (ret != 200)
 		throw runtime_error("Not HTTP 200 Ok while posting msg");
@@ -650,6 +673,7 @@ retry:
 
 	string l;
 	while (s.getline(l)) {
+
 	    /*
 	     * Check for 'chvilku strpeni prosim'-like error.
 	     * If we're alone, we can't check :/
@@ -672,7 +696,7 @@ retry:
 	    /**
 	     * Detect envelope blinking and emit event
 	     */
-	    static string pat3 = "<img src=\"http://img.centrum.cz/x4/rm/msg";
+	    static string pat3 = "<img src=\"https://ximg.cz/x4/rm/msg";
 	    string::size_type pos;
 	    if ((pos = l.find(pat3)) != string::npos) {
 		if (l[pos + pat3.length()] == '_') { // Envelope is blinking
@@ -694,7 +718,7 @@ retry:
 	 *  and
 	 *  - it does not begin with "/" and it does not begin with a
 	 *    nonprintable character
-	 */
+	 */  
 	last_sent = time(0);
 	if (msg.length() && msg[0] != '/' && isprint(msg[0])) {
 	    r.last_sent = last_sent;
@@ -710,7 +734,7 @@ retry:
      */
     void XChat::setdesc(const string& rid, const string& desc)
     {
-	TomiHTTP s;
+	XChatAPI s;
 
 	int retries = servers.size();
 retry:

@@ -40,6 +40,8 @@ ifneq (,$(findstring -apple-,$(TARGET)))
  LDFLAGS += -fexceptions
 endif
 
+LDLIBS += -lcurl 
+
 .PHONY: all clean dep conf dummy buildw32 docs
 
 all: libxchat-bttrw.a gate README
@@ -69,7 +71,7 @@ endif
 
 
 libxchat-bttrw.a: xchat.o roomtext.o login.o room.o irc.o idle.o smiles.o \
-                  charset.o list.o ison.o userinfo.o superadmins.o cluster.o
+                  charset.o list.o ison.o userinfo.o superadmins.o cluster.o xchatapi.o
 	$(AR) rsv $@ $?
 
 gate: gate.o setproctitle.o libxchat-bttrw.a TomiTCP/libTomiTCP.a $(RSRC)

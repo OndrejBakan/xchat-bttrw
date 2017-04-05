@@ -13,7 +13,7 @@ namespace xchat {
      */
     bool XChat::ison(const string& nick)
     {
-	TomiHTTP s;
+	XChatAPI s;
 
 	int retries = servers.size();
 retry:

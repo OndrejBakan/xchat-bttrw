@@ -47,7 +47,7 @@ namespace xchat {
      */
     void XChat::login(const string& user, const string& pass)
     {
-	TomiHTTP s;
+	XChatAPI s;
 
 	int retries = servers.size();
 retry:
@@ -106,7 +106,7 @@ retry:
 	    try { leave(rooms.begin()->first); } catch (...) { }
 	}
 
-	TomiHTTP s;
+	XChatAPI s;
 	
 	int retries = servers.size();
 retry:

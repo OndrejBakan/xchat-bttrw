@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <stdbool.h>
 #include <iostream>
+#include <string>
 #include <set>
 #include <clocale>
 #include "xchat.h"
@@ -9,6 +10,7 @@
 #include "idle.h"
 #include "TomiTCP/http.h"
 #include "TomiTCP/str.h"
+using namespace net;
 
 namespace xchat {
     /**
@@ -55,6 +57,70 @@ namespace xchat {
 
 	return 0;
     }
+    
+    /**
+     * PARSE CSRF - because Gym 
+     * \param rid Room ID.
+     * \return token hash from textarea
+     */  
+
+    string XChat::gettoken(const string& rid)
+    {
+    
+      XChatAPI s;
+      string l; 
+    
+      try { 
+       
+	    int ret = request_GET(s, SERVER_MODCHAT,
+		    "modchat?op=textpageng&skin=2&js=1&rid=" + rid, PATH_AUTH);
+	    if (ret != 200)                             
+		  throw runtime_error("Not HTTP 200 Ok while posting msg");
+	   } catch (runtime_error &e) {
+	    throw runtime_error(string(e.what()) + " - " + lastsrv_broke());
+	   }  
+     
+     while(s.getline(l))
+     {      
+
+      static string pat4 = " name=\"wtkn\"";
+      string::size_type wtkn;
+      if ((wtkn = l.find(pat4)) != string::npos)
+      {   
+      
+        static const string VALUE = "value";
+        static const char DOUBLE_QUOTE = '"';
+
+        string result;
+
+        size_t pos = l.rfind(VALUE);
+        if (pos != string::npos)
+        {
+            size_t beg = l.find_first_of(DOUBLE_QUOTE, pos);
+
+            if (beg != string::npos)
+            {
+                size_t end = l.find_first_of(DOUBLE_QUOTE, beg + 1);
+
+                if (end != string::npos)
+                {
+                  
+                  result = l.substr(beg + 1, end - beg - 1);
+                  return result;
+                
+                }
+            
+            }
+        
+        }
+
+      } 
+     
+     } 
+     
+     return "";
+    
+    }    
 
     /**
      * Go through #sendq and send messages, take flood protection and
@@ -125,7 +191,7 @@ namespace xchat {
 	     * Post it
 	     */
 	    if (rooms.find(msg.room) != rooms.end()) {
-		if (putmsg(rooms[msg.room], msg.target, prepend + msg.msg)) {
+		if (putmsg(rooms[msg.room], msg.target, prepend + msg.msg, gettoken(msg.room))) {
 		    if (!ref.retries--) {
 			auto_ptr<EvRoomError> ev(new EvRoomError);
 			ev->s = "Message lost, xchat is not willing to let it go";

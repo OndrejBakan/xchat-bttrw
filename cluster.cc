@@ -148,7 +148,7 @@ namespace xchat {
         else if (type == PATH_AUTH)
             return "/~$" + uid + "~" + sid + "/" + path;
         else if (type == PATH_STATIC)
-            return "http://" + fallback_server + "/~$" + uid + "~" + sid + "/" + path;
+            return "https://" + fallback_server + "/~$" + uid + "~" + sid + "/" + path;
         else
             throw invalid_argument("Unknown path_type");
     }
@@ -156,28 +156,32 @@ namespace xchat {
     /**
      * Do a GET request...
      */
-    int XChat::request_GET(TomiHTTP &s, server_type st, const string& path,
+    int XChat::request_GET(XChatAPI &s, server_type st, const string& path,
             path_type pt)
     {
         int si = makesrv(st);
         server &ss = servers[si];
+        string url = "https://" + ss.types[st] + makepath(path, pt);
+	      
+        long r = s.GET(url, &cookies);
+        s.parseresponse(&cookies);
+		    return (int)r;
 
-        s.doconnect(ss.host.sa.sa_family ? tomi_ntop(ss.host) : ss.types[st], 80);
-        s.doGET(ss.types[st], 80, makepath(path, pt), &cookies);
-        return s.parseresponse(&cookies);
     }
     
     /**
      * Do a POST request...
      */
-    int XChat::request_POST(TomiHTTP &s, server_type st, const string& path,
+    int XChat::request_POST(XChatAPI &s, server_type st, const string& path,
             path_type pt, const string &data)
     {
         int si = makesrv(st);
         server &ss = servers[si];
+        string url = "https://" + ss.types[st] + makepath(path, pt);
 
-        s.doconnect(ss.host.sa.sa_family ? tomi_ntop(ss.host) : ss.types[st], 80);
-        s.doPOST(ss.types[st], 80, makepath(path, pt), data, &cookies);
-        return s.parseresponse(&cookies);
+        long r = s.POST(url, data, &cookies);
+        s.parseresponse(&cookies);
+		    return (int)r;
+
     }
 }
