@@ -712,6 +712,26 @@ retry:
 	    }
 	}
 
+  try {
+	    time_t cas;
+	    struct tm *timeptr;
+
+	    char datum[100];
+	    cas = time(NULL);
+      timeptr = localtime(&cas);
+      strftime(datum,sizeof (datum),"%S.%s", timeptr);
+
+      string json = "{\"nick_to\":\""+recode_to_client(target)+"\",\"rid\":\""+r.rid+"\",\"message\":\""+recode_to_client(msg)+"\"}";
+
+	    int ret = request_POST(s, SERVER_MODCHAT,
+		    "cb/upload-history/", PATH_AUTH,
+        "r="+TomiHTTP::URLencode(datum), json.c_str());
+	     if (ret != 200)
+		  throw runtime_error("Not HTTP 200 Ok while posting msg");
+	 } catch (runtime_error &e) {
+	    throw runtime_error(string(e.what()) + " - " + lastsrv_broke());
+	}
+
 	/*
 	 * Update last_sent, if
 	 *  - it has a nonzero length
