@@ -1,3 +1,4 @@
+#include <iostream>
 #include "xchat.h"
 #include "TomiTCP/http.h"
 using namespace net;
@@ -173,15 +174,24 @@ namespace xchat {
      * Do a POST request...
      */
     int XChat::request_POST(XChatAPI &s, server_type st, const string& path,
-            path_type pt, const string &data)
+            path_type pt, const string &data, const string &type)
     {
         int si = makesrv(st);
         server &ss = servers[si];
         string url = "https://" + ss.types[st] + makepath(path, pt);
 
-        long r = s.POST(url, data, &cookies);
-        s.parseresponse(&cookies);
-		    return (int)r;
+        if(type != "")
+        {
+          long r = s.CB(url, data, type, &cookies);
+          s.parseresponse(&cookies);
+		      return (int)r;
+        }
+        else
+        {
+          long r = s.POST(url, data, &cookies);
+          s.parseresponse(&cookies);
+		      return (int)r;
+        }
 
     }
 }

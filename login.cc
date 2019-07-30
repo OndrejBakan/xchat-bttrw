@@ -54,7 +54,7 @@ retry:
 	try {
 	    int ret = request_POST(s, SERVER_MODCHAT, "~guest~/login/", PATH_PLAIN,
                     "js=1&hp=1&usehash=3&skin=2&u_name="+TomiHTTP::URLencode(user)+"&u_pass="+
-		    TomiHTTP::URLencode(pass));
+		    TomiHTTP::URLencode(pass), "");
 	    if (ret != 302)
 		throw runtime_error("Not HTTP 302 Found while logging in");
 

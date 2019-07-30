@@ -41,6 +41,7 @@ ifneq (,$(findstring -apple-,$(TARGET)))
 endif
 
 LDLIBS += -lcurl 
+LDLIBS += -liconv
 
 .PHONY: all clean dep conf dummy buildw32 docs
 
@@ -64,10 +65,6 @@ conf:
 	$(MAKECONF)
 
 -include .config
-
-ifeq ($(ICONV),external)
- LDLIBS += -liconv
-endif
 
 
 libxchat-bttrw.a: xchat.o roomtext.o login.o room.o irc.o idle.o smiles.o \

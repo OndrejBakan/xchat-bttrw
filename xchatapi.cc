@@ -28,7 +28,48 @@ namespace net {
 		curl = curl_easy_init();
 		if (curl) {
 			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-      curl_easy_setopt(curl, CURLOPT_USERAGENT, "bttrw/2.0");      
+      curl_easy_setopt(curl, CURLOPT_USERAGENT, "bttrw/2.0");
+			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
+			curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1L);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, xchatapi_curl_writer);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
+			res = curl_easy_perform(curl);
+
+			if (res != CURLE_OK) {
+				http_code = 500;
+			} else {
+				curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+			}
+
+			curl_easy_cleanup(curl);
+		}
+
+		curl_global_cleanup();
+
+		return http_code;
+	}
+
+	long XChatAPI::CB(const string url, const string post, const string json, TomiCookies* cookies)
+	{
+		CURL *curl;
+		CURLcode res;
+		long http_code = 500;
+
+    struct curl_slist *slist1;
+
+    slist1 = NULL;
+    slist1 = curl_slist_append(slist1, "Content-Type: application/json");
+
+		buffer.clear();
+		curl_global_init(CURL_GLOBAL_DEFAULT);
+		curl = curl_easy_init();
+		if (curl) {
+			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+      curl_easy_setopt(curl, CURLOPT_USERAGENT, "bttrw/2.0");
+      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist1);
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
 			curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
 			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);

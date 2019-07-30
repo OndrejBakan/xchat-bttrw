@@ -14,7 +14,7 @@ namespace net {
 	public:
 		typedef map<string,string> headers_t;
 		headers_t headers;
-
+    long CB(const string url, const string post, const string json, TomiCookies* cookies);
 		long GET(const string url, TomiCookies* cookies);
 		long POST(const string url, const string post, TomiCookies* cookies);
 		int parseresponse(TomiCookies* cookies);

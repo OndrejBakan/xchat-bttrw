@@ -275,7 +275,7 @@ namespace xchat {
             int request_GET(net::XChatAPI &s, server_type st, const string& path,
                     path_type pt);
             int request_POST(net::XChatAPI &s, server_type st, const string& path,
-                    path_type pt, const string &data);
+                    path_type pt, const string &data, const string &type);
 	    net::TomiCookies cookies; ///< Cookies for connection.
 
 	    string uid; ///< User id, set by #login. Used for queries.

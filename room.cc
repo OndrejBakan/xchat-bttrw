@@ -81,7 +81,7 @@ namespace xchat {
 retry0:
 	try {
 	    ret = request_POST(s, SERVER_MODCHAT,
-		    "room/intro.php", PATH_AUTH, "_btn_enter=ENTER&disclaim=1&sexwarn=1&rid=" + rid);
+		    "room/intro.php", PATH_AUTH, "_btn_enter=ENTER&disclaim=1&sexwarn=1&rid=" + rid, "");
 	} catch (runtime_error &e) {
 	    if (retries--) {
 		lastsrv_broke();
@@ -662,7 +662,7 @@ retry:
 		    "op=textpageng&js=1&skin=2&rid=" + r.rid +
 		    "&textarea=" + TomiHTTP::URLencode(msg) +
 		    "&wtkn=" + TomiHTTP::URLencode(token) +        
-		    "&target=" + TomiHTTP::URLencode(target));
+		    "&target=" + TomiHTTP::URLencode(target), "");
 	    if (ret != 200)
 		throw runtime_error("Not HTTP 200 Ok while posting msg");
 	} catch (runtime_error &e) {
@@ -710,6 +710,26 @@ retry:
 		    note_emitted = false;
 		}
 	    }
+
+ }
+  	try {
+	    time_t cas;
+	    struct tm *timeptr;
+
+	    char datum[100];
+	    cas = time(NULL);
+      timeptr = localtime(&cas);
+      strftime(datum,sizeof (datum),"%S.%s", timeptr);
+
+      string json = "{\"nick_to\":\""+recode_to_client(target)+"\",\"rid\":\""+r.rid+"\",\"message\":\""+recode_to_client(msg)+"\"}";
+
+	    int ret = request_POST(s, SERVER_MODCHAT,
+		    "cb/upload-history/", PATH_AUTH,
+        "r="+TomiHTTP::URLencode(datum), json.c_str());
+	     if (ret != 200)
+		  throw runtime_error("Not HTTP 200 Ok while posting msg");
+	 } catch (runtime_error &e) {
+	    throw runtime_error(string(e.what()) + " - " + lastsrv_broke());
 	}
 
 	/*
@@ -742,7 +762,7 @@ retry:
 	    int ret = request_POST(s, SERVER_MODCHAT,
 		    "modchat", PATH_AUTH,
 		    "op=rightadmin&skin=2&rid=" + rid + "&desc=" +
-		    TomiHTTP::URLencode(recode_from_client(desc)));
+		    TomiHTTP::URLencode(recode_from_client(desc)), "");
 	    if (ret != 200)
 		throw runtime_error("Not HTTP 200 Ok while setting room desc");
 	} catch (runtime_error &e) {
