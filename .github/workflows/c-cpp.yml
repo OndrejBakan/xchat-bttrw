@@ -13,7 +13,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+
     - name: make
       run: make
+
+    - name: Upload binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: compiled-binaries
+        path: ./build
