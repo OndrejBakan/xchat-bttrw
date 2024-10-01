@@ -20,8 +20,13 @@ jobs:
     - name: make
       run: make
 
+    # List files to check where the binaries are
+    - name: List files after build
+      run: ls -la ./  # Adjust this to check the directory where binaries are saved
+
+    # Upload binaries as artifacts
     - name: Upload binaries
       uses: actions/upload-artifact@v3
       with:
         name: compiled-binaries
-        path: ./build/**/*
+        path: ./build/**/*  # Adjust this to your actual binary path
