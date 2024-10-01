@@ -29,4 +29,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: compiled-binaries
-        path: ./build/**/*  # Adjust this to your actual binary path
+        path: ./gate  # Adjust this to your actual binary path
