@@ -14,6 +14,10 @@ else
  DEBUG=yes
 endif
 
+ifeq ($(shell ldd --version 2>&1 | grep -q musl && echo alpine),alpine)
+	CFLAGS += -DWAIT_ANY=-1
+endif
+
 WINDRES=windres
 CFLAGS+=-Wall -D_GNU_SOURCE -O2
 CXXFLAGS=$(CFLAGS)
