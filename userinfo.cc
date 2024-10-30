@@ -87,7 +87,7 @@ retry1:
 
 	if (!s.getline(l))
 	    throw runtime_error("User info is not complete.");
-	out.icq = recode_utf8_to_client(chomp(l));
+	out.icq = recode_to_client(chomp(l));
 
 	s.close();
 
